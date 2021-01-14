@@ -1,0 +1,121 @@
+Dim zapytanie, zapytanie2 As Integer
+Dim maska As Variant
+Dim pierwszy, drugi, trzeci, czwarty As Integer
+Dim maska_bin As String
+Dim oktety As Range
+Dim komorka As Range
+
+
+
+
+' Funkcja zamieniajaca liczbe dziesietna na binarna '
+
+Function DecToBin$(ByVal n&)
+    Do
+        DecToBin = n Mod 2 & DecToBin
+        n = n \ 2
+    Loop While n
+End Function
+
+'Funkcja zamieniajaca liczbe binarna na dziesietna '
+
+
+Function BinToDec(bin As String) As Long
+    Dim p As Integer
+    Dim bity As Integer
+
+    bity = Len(bin) - 1
+    For p = 0 To bity
+        BinToDec = BinToDec + Mid(bin, bity - p + 1, 1) * 2 ^ p
+    Next
+End Function
+
+'sprawdzenie jakie dane uzytkownik chce policzyc'
+
+Sub Kalkulator()
+On Error GoTo komunikat
+line_label:
+    Cells.Clear
+    Set oktety = Range("B2:E2")
+    zapytanie = MsgBox("Czy maska jest w postaci dziesietnej?", vbYesNoCancel)
+    
+'zamiana maski dziesietnej na skrocona'
+
+    If zapytanie = vbYes Then
+        maska = InputBox("Wprowadz maske dziesietna:", "Konwerter")
+        Range("A1").Value = maska
+        Range("A1").TextToColumns Destination:=Range("B2:E2"), Other:=True, OtherChar:="."
+        For Each komorka In oktety
+            If komorka.Value > 256 Or komorka.Value < 0 Then
+                MsgBox ("Zla wartosc, sprobuj jeszcze raz")
+                GoTo line_label
+            Else
+            End If
+        Next
+        pierwszy = DecToBin(Range("B2"))
+        drugi = DecToBin(Range("C2"))
+        trzeci = DecToBin(Range("D2"))
+        czwarty = DecToBin(Range("E2"))
+        maska_bin = (pierwszy & drugi & trzeci & czwarty)
+        MsgBox Len(maska_bin) - Len(Replace(maska_bin, "1", ""))
+
+        GoTo line_label
+        
+    ElseIf zapytanie = vbCancel Then
+    GoTo koniec
+    
+    
+    
+ 'zamiana maski skroconej na dziesietna'
+ 
+    Else
+        maska = InputBox("Wprowadz maske skrocona:", "Konwerter")
+        Range("A1").Value = maska
+        maska_bin = ""
+        For i = 1 To maska
+            If i = 8 Or i = 16 Or i = 24 Then
+                maska_bin = maska_bin & "1" & "."
+            Else
+                maska_bin = maska_bin & "1"
+            End If
+        Next
+        For j = i To 32
+            If j = 8 Or j = 16 Or j = 24 Then
+                maska_bin = maska_bin & "0" & "."
+            Else
+                maska_bin = maska_bin & "0"
+            End If
+        Next
+        Range("A2").Value = maska_bin
+        Range("A2").TextToColumns Destination:=oktety, Other:=True, OtherChar:="."
+        pierwszy = BinToDec(Range("B2"))
+        drugi = BinToDec(Range("C2"))
+        trzeci = BinToDec(Range("D2"))
+        czwarty = BinToDec(Range("E2"))
+        maska_dec = pierwszy & "." & drugi & "." & trzeci & "." & czwarty
+        
+       
+        MsgBox (maska_dec)
+        
+  'zapytanie czy wprowadza dane dalej'
+        
+        zapytanie2 = MsgBox("Czy chcesz wpisac inna maske?", vbYesNo, "Zapytanie")
+            If zapytanie2 = vbYes Then
+            GoTo line_label
+            ElseIf zapytanie2 = vbNo Then
+            GoTo koniec:
+            End If
+    
+    End If
+
+'komunikat bledu'
+
+komunikat:
+MsgBox Err.Description & " - Sprawdz dane"
+
+
+koniec:
+
+End Sub
+
+
